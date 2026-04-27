@@ -19,6 +19,11 @@ df = pd.read_csv(path)
 
 df.loc[df['tile_dim']<0, 'tile_dim'] = np.nan
 df.loc[df['grade']<=0, 'grade'] = np.nan
+
+### Set NaNs to median values
+df.loc[pd.isnull(df['tile_dim']), 'tile_dim'] = np.nanmedian(df['tile_dim'])
+df.loc[pd.isnull(df['grade']), 'grade'] = np.nanmedian(df['grade'])
+
 df['slope'] = df['grade'] / 100
 df['diam'] = df['tile_dim'] * .0254
 df['radius'] = df['diam'] / 2
