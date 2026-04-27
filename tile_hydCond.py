@@ -13,20 +13,34 @@ fracFull = 0.1
 cellRes = 4
 subsurf = 1.5
 
-path = "C:/Users/swimm/Downloads/tile_properties.txt"
+#path = "C:/Users/swimm/Downloads/tile_properties.txt"
 
-df = pd.read_csv(path)
+#df = pd.read_csv(path)
 
-df.loc[df['tile_dim']<0, 'tile_dim'] = np.nan
-df.loc[df['grade']<=0, 'grade'] = np.nan
+mapName = 'tiling'
+
+gs.run_command('v.db.addcolumn', map=mapName, col=['slope double precision', 'diam double precision', 'radius double precision', 'theta double precision', \
+                                                   'filledArea double precision', 'peri double precision', 'Rh double precision', 'n double precision', \
+                                                   'n_partial double precision', 'velocity double precision', 'hydCond double precision'])
+
+gs.run_command('v.db.update', map=mapName, column='tile_dim', where='tile_dim < 0', query_column='MEDIAN("tile_dim")')
+gs.run_command('v.db.update', map=mapName, column='grade', where='grade <= 0', query_column='MEDIAN("grade")')
+
+#df.loc[df['tile_dim']<0, 'tile_dim'] = np.nan
+#df.loc[df['grade']<=0, 'grade'] = np.nan
 
 ### Set NaNs to median values
-df.loc[pd.isnull(df['tile_dim']), 'tile_dim'] = np.nanmedian(df['tile_dim'])
-df.loc[pd.isnull(df['grade']), 'grade'] = np.nanmedian(df['grade'])
+#df.loc[pd.isnull(df['tile_dim']), 'tile_dim'] = np.nanmedian(df['tile_dim'])
+#df.loc[pd.isnull(df['grade']), 'grade'] = np.nanmedian(df['grade'])
 
-df['slope'] = df['grade'] / 100
-df['diam'] = df['tile_dim'] * .0254
-df['radius'] = df['diam'] / 2
+gs.run_command('v.db.update', map=mapName, column='slope', query_column = 'grade' / 100.)
+gs.run_command('v.db.update', map=mapName, column='diam', query_column = 'tile_dim' * .0254)
+gs.run_command('v.db.update', map=mapName, column='radius', query_column = 'diiam' * .0254)
+
+#df['slope'] = df['grade'] / 100
+#df['diam'] = df['tile_dim'] * .0254
+#df['radius'] = df['diam'] / 2
+
 
 ### Hydraulic radius calculation
 df['theta'] = 2 * np.arccos((0.5 - fracFull) / 0.5)
